@@ -19,7 +19,6 @@ const wss = new SocketServer({ server });
 
 //// Connecting Websocket
 wss.on('connection', (ws) => {
-  console.log('Client connected! Now at ' + wss.clients.size + ' clients =]');
 
   // BROADCAST NUMBER OF CLIENTS
   const clientSize = {
@@ -28,13 +27,11 @@ wss.on('connection', (ws) => {
   }
   wss.clients.forEach((client) => {
     if (client.readyState = WebSocket.OPEN) {
-      console.log('Broadcasting number of clients after a joiner');
       client.send(JSON.stringify(clientSize));
     }
   })
 
   ws.on('message', (message) => {
-    console.log('Received JSON Message from client')
     let parseData = JSON.parse(message);
 
     //// BROADCAST MESSAGES TO ALL CLIENTS
@@ -47,7 +44,6 @@ wss.on('connection', (ws) => {
       }
       wss.clients.forEach((client) => {
         if (client.readyState === WebSocket.OPEN) {
-          console.log('Broadcasting message to all clients')
           client.send(JSON.stringify(castMessage));
         }
       }); // CLOSE forEach broadcast
@@ -62,7 +58,6 @@ wss.on('connection', (ws) => {
       }
       wss.clients.forEach((client) => {
         if(client.readyState === WebSocket.OPEN) {
-          console.log('Broadcasting notification')
           client.send(JSON.stringify(castNotification));
         }
       }); // CLOSE forEach broadcast
@@ -72,10 +67,12 @@ wss.on('connection', (ws) => {
 
   //// Callback when client closes socket
   ws.on('close', () => {
-    console.log('Client disconnected! now at ' + wss.clients.size + ' clients =[');
+    const clientSize = {
+      type: 'incClient',
+      size: wss.clients.size
+    }
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        console.log('Broadcasting client size after a leaver');
         client.send(JSON.stringify(clientSize));
       }
     })

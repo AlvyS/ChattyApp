@@ -14,7 +14,6 @@ class ChatBar extends Component {
 // On enter, create const 'message' and run it as 'prop -> state' up through app.jsx
   handleEnter = (event) => {
     if (event.key === 'Enter') {
-      console.log("Enter Pressed!", event.target.value);
       const message = this.state.message;
       this.props.updateMessage(message)
       this.setState({ message: '' });
@@ -30,7 +29,6 @@ class ChatBar extends Component {
   }
 
   render() {
-    // console.log('Rendered <Chatbar/>');
     return (
       <footer className="chatbar">
         <input
