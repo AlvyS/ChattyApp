@@ -17,24 +17,29 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+// For casting to all available clients
+function broadcastToClients(type) {
+  wss.clients.forEach((client) => {
+    if(client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(type));
+    }
+  })
+}
+
 //// Connecting Websocket
 wss.on('connection', (ws) => {
 
-  // BROADCAST NUMBER OF CLIENTS
+  //// Broadcast client count
   const clientSize = {
     type: 'incClient',
     size: wss.clients.size
   }
-  wss.clients.forEach((client) => {
-    if (client.readyState = WebSocket.OPEN) {
-      client.send(JSON.stringify(clientSize));
-    }
-  })
+  broadcastToClients(clientSize);
 
   ws.on('message', (message) => {
     let parseData = JSON.parse(message);
 
-    //// BROADCAST MESSAGES TO ALL CLIENTS
+    //// Broadcast messages to clients
     if(parseData.type === 'postedMessage') {
       const castMessage = {
         type: 'incMessage',
@@ -42,27 +47,18 @@ wss.on('connection', (ws) => {
         username: parseData.username,
         content: parseData.content
       }
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(castMessage));
-        }
-      }); // CLOSE forEach broadcast
-    } // CLOSE if postedMessage
+      broadcastToClients(castMessage);
+    }
     
-    //// BROADCAST NOTIFICATIONS TO ALL CLIENTS
+    //// Broadcast notifications to clients
     else if(parseData.type === 'postedNotification') {
       const castNotification = {
         type: 'incNotification',
         id: uuid.v4(),
         content: parseData.nameNotification
       }
-      wss.clients.forEach((client) => {
-        if(client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(castNotification));
-        }
-      }); // CLOSE forEach broadcast
-    } // CLOSE if postedNotification
-
+      broadcastToClients(castNotification);
+    }
   });
 
   //// Callback when client closes socket
@@ -71,11 +67,8 @@ wss.on('connection', (ws) => {
       type: 'incClient',
       size: wss.clients.size
     }
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(clientSize));
-      }
-    })
+    broadcastToClients(clientSize);
   });
 
-}); // CLOSE on connection
+// CLOSE connection
+});

@@ -4,13 +4,14 @@ import Message from './Message.jsx';
 class MessageList extends Component {
   render() {
     return (
-        <main className="messages">
+      <main className="messages">
         {
-        this.props.messages.map((messageList, index) => { // takes the 'state' from appjsx, index for primary id
-          return <Message message = {messageList} key = {index} /> // the 'state' from app down to message
+        // takes the 'state' from appjsx, index for unique id
+        this.props.messages.map((messageList, index) => {
+          return <Message message = {messageList} key = {index} />
           })
         }
-        </main>
+      </main>
     );
   }
 }
